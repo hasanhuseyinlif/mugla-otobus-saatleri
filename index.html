@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muğla 1-43 Otobüs Saatleri</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1d4ed8;
+            font-size: 1.5rem;
+        }
+        .select-box {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            color: #000;
+        }
+        .next-bus {
+            background-color: #1d4ed8;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .next-bus h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+        .next-bus .time {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .next-bus .countdown {
+            background-color: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .category {
+            font-weight: bold;
+            color: #4b5563;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .bus-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .bus-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+        }
+        .bus-list li:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            background-color: #1d4ed8;
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .empty-message {
+            text-align: center;
+            color: #6b7280;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>1-43 Hat Bilgisi</h1>
+    
+    <select class="select-box" id="directionSelect" onchange="hesapla()">
+        <option value="bayir">Bayır Kalkış ➔ Menteşe</option>
+        <option value="mentese">Menteşe Stadyum ➔ Bayır</option>
+    </select>
+
+    <div class="next-bus">
+        <h2>Sıradaki Otobüs</h2>
+        <div class="time" id="siradakiSaat">--:--</div>
+        <div class="countdown" id="kalanSure">Hesaplanıyor...</div>
+    </div>
+
+    <div id="listeAlani"></div>
+</div>
+
+<script>
+    const saatler = {
+        bayir: {
+            haftaici: ['07:00', '07:20', '07:35', '07:45', '07:55', '08:05', '08:30', '09:00', '09:30', '10:15', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:35', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10'],
+            cumartesi: ['07:15', '07:35', '08:00', '08:30', '09:15', '10:15', '11:00', '12:00', '12:30', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10'],
+            pazar: ['07:30', '08:00', '08:30', '09:15', '10:15', '11:00', '12:00', '12:30', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10']
+        },
+        mentese: {
+            haftaici: ['07:40', '08:00', '08:20', '08:40', '09:00', '09:30', '10:00', '10:30', '11:00', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '15:50', '16:15', '16:35', '16:55', '17:15', '17:35', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00'],
+            cumartesi: ['07:40', '08:00', '08:30', '09:15', '10:00', '11:00', '12:00', '13:00', '13:30', '14:00', '15:00', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00'],
+            pazar: ['08:00', '08:30', '09:15', '10:00', '11:00', '12:00', '13:00', '13:30', '14:00', '15:00', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00']
+        }
+    };
+
+    function dakikayaCevir(saatMetni) {
+        let parcalar = saatMetni.split(':');
+        return (parseInt(parcalar[0]) * 60) + parseInt(parcalar[1]);
+    }
+
+    function kategoriBul(saatMetni) {
+        let saat = parseInt(saatMetni.split(':')[0]);
+        if (saat < 12) return 'Sabah Seferleri';
+        if (saat < 18) return 'Öğleden Sonra Seferleri';
+        return 'Akşam Seferleri';
+    }
+
+    function hesapla() {
+        let yon = document.getElementById('directionSelect').value;
+        let simdi = new Date();
+        let gun = simdi.getDay();
+        
+        let gunTipi = 'haftaici';
+        if (gun === 6) gunTipi = 'cumartesi';
+        if (gun === 0) gunTipi = 'pazar';
+
+        let mevcutDakika = (simdi.getHours() * 60) + simdi.getMinutes();
+        let tumSaatler = saatler[yon][gunTipi];
+        
+        // Sadece gelecekteki saatleri al (gidenleri gizle)
+        let gelecekSaatler = [];
+        for (let i = 0; i < tumSaatler.length; i++) {
+            if (dakikayaCevir(tumSaatler[i]) > mevcutDakika) {
+                gelecekSaatler.push(tumSaatler[i]);
+            }
+        }
+
+        let siradakiSaatKutusu = document.getElementById('siradakiSaat');
+        let kalanSureKutusu = document.getElementById('kalanSure');
+        let listeAlani = document.getElementById('listeAlani');
+
+        // Sayfayı temizle
+        listeAlani.innerHTML = '';
+
+        if (gelecekSaatler.length === 0) {
+            siradakiSaatKutusu.innerHTML = "--:--";
+            kalanSureKutusu.innerHTML = "Seferler bitti";
+            listeAlani.innerHTML = '<div class="empty-message">Bugün için planlanan başka sefer kalmadı.</div>';
+            return;
+        }
+
+        // Sıradaki otobüsü yazdır
+        let siradaki = gelecekSaatler[0];
+        siradakiSaatKutusu.innerHTML = siradaki;
+        
+        let fark = dakikayaCevir(siradaki) - mevcutDakika;
+        let saatFarki = Math.floor(fark / 60);
+        let dakikaFarki = fark % 60;
+        
+        if (saatFarki > 0) {
+            kalanSureKutusu.innerHTML = saatFarki + " saat " + dakikaFarki + " dakika var";
+        } else {
+            kalanSureKutusu.innerHTML = dakikaFarki + " dakika var";
+        }
+
+        // Listeyi kategorilere ayırarak oluştur
+        let mevcutKategori = "";
+        let ul;
+
+        for (let i = 0; i < gelecekSaatler.length; i++) {
+            let saatStr = gelecekSaatler[i];
+            let kategori = kategoriBul(saatStr);
+
+            if (kategori !== mevcutKategori) {
+                // Yeni kategori başlığı
+                let baslik = document.createElement('div');
+                baslik.className = 'category';
+                baslik.innerHTML = kategori;
+                listeAlani.appendChild(baslik);
+                
+                // Yeni liste
+                ul = document.createElement('ul');
+                ul.className = 'bus-list';
+                listeAlani.appendChild(ul);
+                
+                mevcutKategori = kategori;
+            }
+
+            let li = document.createElement('li');
+            li.innerHTML = saatStr;
+            
+            // Eğer sıradaki otobüsse yanına rozet ekle
+            if (i === 0) {
+                li.innerHTML += '<span class="badge">Sıradaki</span>';
+                li.style.color = '#1d4ed8';
+                li.style.fontWeight = 'bold';
+            }
+            
+            ul.appendChild(li);
+        }
+    }
+
+    // Sayfa açıldığında çalıştır
+    window.onload = function() {
+        hesapla();
+        // Her 1 dakikada bir otomatik yenile
+        setInterval(hesapla, 60000);
+    };
+</script>
+
+</body>
+</html>
