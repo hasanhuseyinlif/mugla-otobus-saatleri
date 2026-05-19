@@ -6,10 +6,15 @@
     <title>Muğla 1-43 Otobüs Saatleri</title>
     <style>
         :root {
-            --primary: #1e3a8a;
-            --bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text: #1f2937;
+            /* Karanlık Tema Renkleri */
+            --primary: #3b82f6; 
+            --primary-glow: rgba(59, 130, 246, 0.2);
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #374151;
+            --input-bg: #2d3748;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -27,7 +32,8 @@
             background: var(--card-bg);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
         }
         h1 {
             text-align: center;
@@ -42,182 +48,38 @@
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
         select {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
-            border: 1px solid #d1d5db;
+            border: 1px solid var(--border);
             font-size: 1rem;
-            background-color: white;
+            background-color: var(--input-bg);
+            color: var(--text);
             outline: none;
+            cursor: pointer;
+        }
+        select:focus {
+            border-color: var(--primary);
         }
         .next-bus-card {
-            background-color: var(--primary);
-            color: white;
+            background-color: var(--primary-glow);
+            border: 1px solid rgba(59, 130, 246, 0.3);
             text-align: center;
             padding: 30px 20px;
             border-radius: 12px;
             margin-bottom: 24px;
         }
         .next-bus-title {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.1rem;
+            color: var(--primary);
             margin-bottom: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .next-bus-time {
-            font-size: 3.5rem;
-            font-weight: bold;
-            margin: 0;
-        }
-        .next-bus-countdown {
-            margin-top: 10px;
-            font-size: 1rem;
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
-        .schedule-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .schedule-list li {
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-        }
-        .schedule-list li:last-child {
-            border-bottom: none;
-        }
-        .schedule-list li.past {
-            opacity: 0.4;
-            text-decoration: line-through;
-        }
-        .schedule-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 5px;
-            display: inline-block;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>1-43 Hat Bilgisi</h1>
-    
-    <div class="select-group">
-        <label for="direction">Yön Seçin:</label>
-        <select id="direction" onchange="updateUI()">
-            <option value="bayir">Bayır Kalkış ➔ Menteşe</option>
-            <option value="mentese">Menteşe Stadyum ➔ Bayır</option>
-        </select>
-    </div>
-
-    <div class="next-bus-card">
-        <div class="next-bus-title">Sıradaki Otobüs</div>
-        <div class="next-bus-time" id="nextBusTime">--:--</div>
-        <div class="next-bus-countdown" id="countdown">Hesaplanıyor...</div>
-    </div>
-
-    <div class="schedule-title">Günün Tüm Saatleri</div>
-    <ul class="schedule-list" id="scheduleList">
-        </ul>
-</div>
-
-<script>
-    const schedules = {
-        'bayir': {
-            'weekday': ['07:00', '07:20', '07:35', '07:45', '07:55', '08:05', '08:30', '09:00', '09:30', '10:15', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:35', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10'],
-            'saturday': ['07:15', '07:35', '08:00', '08:30', '09:15', '10:15', '11:00', '12:00', '12:30', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10'],
-            'sunday': ['07:30', '08:00', '08:30', '09:15', '10:15', '11:00', '12:00', '12:30', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10']
-        },
-        'mentese': {
-            'weekday': ['07:40', '08:00', '08:20', '08:40', '09:00', '09:30', '10:00', '10:30', '11:00', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '15:50', '16:15', '16:35', '16:55', '17:15', '17:35', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00'],
-            'saturday': ['07:40', '08:00', '08:30', '09:15', '10:00', '11:00', '12:00', '13:00', '13:30', '14:00', '15:00', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00'],
-            'sunday': ['08:00', '08:30', '09:15', '10:00', '11:00', '12:00', '13:00', '13:30', '14:00', '15:00', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00']
-        }
-    };
-
-    function getDayType() {
-        const day = new Date().getDay();
-        if (day === 0) return 'sunday';
-        if (day === 6) return 'saturday';
-        return 'weekday';
-    }
-
-    function timeToMinutes(timeStr) {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    }
-
-    function updateUI() {
-        const direction = document.getElementById('direction').value;
-        const dayType = getDayType();
-        const times = schedules[direction][dayType];
-        
-        const now = new Date();
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-        let nextTimeStr = null;
-        let nextTimeIndex = -1;
-
-        for (let i = 0; i < times.length; i++) {
-            if (timeToMinutes(times[i]) > currentMinutes) {
-                nextTimeStr = times[i];
-                nextTimeIndex = i;
-                break;
-            }
-        }
-
-        // Sıradaki otobüsü güncelle
-        const nextBusEl = document.getElementById('nextBusTime');
-        const countdownEl = document.getElementById('countdown');
-        
-        if (nextTimeStr) {
-            nextBusEl.textContent = nextTimeStr;
-            const remaining = timeToMinutes(nextTimeStr) - currentMinutes;
-            const h = Math.floor(remaining / 60);
-            const m = remaining % 60;
-            let text = "Kalkışa ";
-            if(h > 0) text += h + " saat ";
-            text += m + " dakika var";
-            countdownEl.textContent = text;
-        } else {
-            nextBusEl.textContent = "--:--";
-            countdownEl.textContent = "Bugün için seferler bitti";
-        }
-
-        // Tüm listeyi güncelle
-        const listEl = document.getElementById('scheduleList');
-        listEl.innerHTML = '';
-        
-        times.forEach((time, index) => {
-            const li = document.createElement('li');
-            li.textContent = time;
-            
-            if (timeToMinutes(time) <= currentMinutes) {
-                li.classList.add('past');
-                li.innerHTML += ' <span>(Gitti)</span>';
-            } else if (index === nextTimeIndex) {
-                li.style.fontWeight = 'bold';
-                li.style.color = 'var(--primary)';
-                li.innerHTML += ' <span>(Sıradaki)</span>';
-            }
-            
-            listEl.appendChild(li);
-        });
-    }
-
-    // İlk yüklemede ve her dakikada bir güncelle
-    updateUI();
-    setInterval(updateUI, 60000);
-</script>
-
-</body>
-</html>
+            font-
