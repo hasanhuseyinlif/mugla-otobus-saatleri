@@ -6,15 +6,15 @@
     <title>Muğla 1-43 Otobüs Saatleri</title>
     <style>
         :root {
-            /* Karanlık Tema Renkleri */
+            /* Daha Belirgin Koyu Tema Renkleri */
             --primary: #3b82f6; 
             --primary-glow: rgba(59, 130, 246, 0.2);
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --text: #f3f4f6;
+            --bg: #111827; /* Koyu Lacivert/Gri Arka Plan */
+            --card-bg: #1f2937; /* Daha Açık Kutu Rengi */
+            --text: #f9fafb; /* Tam Beyaz Metin */
             --text-muted: #9ca3af;
-            --border: #374151;
-            --input-bg: #2d3748;
+            --border: #4b5563;
+            --input-bg: #374151;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -32,7 +32,7 @@
             background: var(--card-bg);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
             box-sizing: border-box;
         }
         h1 {
@@ -67,7 +67,7 @@
         }
         .next-bus-card {
             background-color: var(--primary-glow);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.4);
             text-align: center;
             padding: 30px 20px;
             border-radius: 12px;
@@ -86,7 +86,7 @@
             font-weight: bold;
             margin: 0;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .next-bus-countdown {
             margin-top: 15px;
@@ -140,152 +140,5 @@
             color: var(--text-muted);
             padding: 30px 0;
             font-style: italic;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255,255,255,0.05);
             border-radius: 8px;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>1-43 Hat Bilgisi</h1>
-    
-    <div class="select-group">
-        <label for="direction">Yön Seçin</label>
-        <select id="direction" onchange="updateUI()">
-            <option value="bayir">Bayır Kalkış ➔ Menteşe</option>
-            <option value="mentese">Menteşe Stadyum ➔ Bayır</option>
-        </select>
-    </div>
-
-    <div class="next-bus-card">
-        <div class="next-bus-title">Sıradaki Otobüs</div>
-        <div class="next-bus-time" id="nextBusTime">--:--</div>
-        <div class="next-bus-countdown" id="countdown">Hesaplanıyor...</div>
-    </div>
-
-    <div id="scheduleContainer"></div>
-</div>
-
-<script>
-    // PDF'ten alınan tam saat listesi
-    const schedules = {
-        'bayir': {
-            'weekday': ['07:00', '07:20', '07:35', '07:45', '07:55', '08:05', '08:30', '09:00', '09:30', '10:15', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:35', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10'],
-            'saturday': ['07:15', '07:35', '08:00', '08:30', '09:15', '10:15', '11:00', '12:00', '12:30', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10'],
-            'sunday': ['07:30', '08:00', '08:30', '09:15', '10:15', '11:00', '12:00', '12:30', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:10', '20:10', '22:10']
-        },
-        'mentese': {
-            'weekday': ['07:40', '08:00', '08:20', '08:40', '09:00', '09:30', '10:00', '10:30', '11:00', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '15:50', '16:15', '16:35', '16:55', '17:15', '17:35', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00'],
-            'saturday': ['07:40', '08:00', '08:30', '09:15', '10:00', '11:00', '12:00', '13:00', '13:30', '14:00', '15:00', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00'],
-            'sunday': ['08:00', '08:30', '09:15', '10:00', '11:00', '12:00', '13:00', '13:30', '14:00', '15:00', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:10', '21:15', '23:00']
-        }
-    };
-
-    function getDayType() {
-        const day = new Date().getDay();
-        if (day === 0) return 'sunday';
-        if (day === 6) return 'saturday';
-        return 'weekday';
-    }
-
-    function timeToMinutes(timeStr) {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    }
-
-    // Saatin hangi kategoriye ait olduğunu bulur
-    function getCategory(timeStr) {
-        const hour = parseInt(timeStr.split(':')[0], 10);
-        if (hour >= 5 && hour < 12) return '🌅 Sabah';
-        if (hour >= 12 && hour < 18) return '☀️ Öğleden Sonra';
-        return '🌙 Akşam';
-    }
-
-    function updateUI() {
-        const direction = document.getElementById('direction').value;
-        const dayType = getDayType();
-        const allTimes = schedules[direction][dayType];
-        
-        const now = new Date();
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-        // SADECE gelecek saatleri filtrele (Gidenleri gizler)
-        const futureTimes = allTimes.filter(time => timeToMinutes(time) > currentMinutes);
-
-        const nextBusEl = document.getElementById('nextBusTime');
-        const countdownEl = document.getElementById('countdown');
-        const containerEl = document.getElementById('scheduleContainer');
-        containerEl.innerHTML = ''; // Önceki listeyi temizle
-
-        // Eğer gün içinde başka otobüs kalmadıysa
-        if (futureTimes.length === 0) {
-            nextBusEl.textContent = "--:--";
-            countdownEl.textContent = "Bugün için seferler bitti";
-            containerEl.innerHTML = '<div class="no-bus-message">Günün kalan saatlerinde planlanan başka sefer bulunmuyor.</div>';
-            return;
-        }
-
-        // Sıradaki otobüs bilgilerini güncelle
-        const nextTimeStr = futureTimes[0];
-        nextBusEl.textContent = nextTimeStr;
-        
-        const remaining = timeToMinutes(nextTimeStr) - currentMinutes;
-        const h = Math.floor(remaining / 60);
-        const m = remaining % 60;
-        let text = "Kalkışa ";
-        if(h > 0) text += h + " saat ";
-        text += m + " dakika var";
-        countdownEl.textContent = text;
-
-        // Kalan saatleri kategorilerine göre grupla
-        const groupedTimes = {};
-        futureTimes.forEach(time => {
-            const cat = getCategory(time);
-            if (!groupedTimes[cat]) groupedTimes[cat] = [];
-            groupedTimes[cat].push(time);
-        });
-
-        // Gruplanmış listeyi ekrana bas
-        let isFirstItem = true;
-
-        for (const [category, timesArray] of Object.entries(groupedTimes)) {
-            // Kategori Başlığı Ekle
-            const catTitle = document.createElement('div');
-            catTitle.className = 'category-title';
-            catTitle.textContent = category;
-            containerEl.appendChild(catTitle);
-
-            // Kategori İçindeki Saatlerin Listesi
-            const ul = document.createElement('ul');
-            ul.className = 'schedule-list';
-
-            timesArray.forEach(time => {
-                const li = document.createElement('li');
-                li.textContent = time;
-                
-                // Eğer listedeki ilk elemansa (sıradaki otobüs ise) rozet ekle
-                if (isFirstItem) {
-                    li.style.color = '#ffffff';
-                    li.style.fontWeight = 'bold';
-                    li.innerHTML += '<span class="badge-next">Sıradaki</span>';
-                    isFirstItem = false;
-                }
-
-                ul.appendChild(li);
-            });
-
-            containerEl.appendChild(ul);
-        }
-    }
-
-    // İlk yüklemede çalıştır
-    updateUI();
-    
-    // Her 1 dakikada bir (60000ms) sayfayı yenilemeden saatleri güncelle
-    setInterval(updateUI, 60000);
-</script>
-
-</body>
-</html>
